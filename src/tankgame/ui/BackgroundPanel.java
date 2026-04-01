@@ -9,7 +9,7 @@ import java.awt.*;
  * 背景面板 - 负责绘制背景
  */
 public class BackgroundPanel extends JPanel {
-    private BackgroundManager backgroundManager;
+    private final BackgroundManager backgroundManager;
 
     // 渐变背景颜色
     private static final Color BG_COLOR_1 = new Color(240, 248, 255);
@@ -49,8 +49,8 @@ public class BackgroundPanel extends JPanel {
         g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f));
         for (int i = 0; i < 3; i++) {
             RadialGradientPaint radialGradient = new RadialGradientPaint(
-                    getWidth() / 2 + (i - 1) * 100,
-                    getHeight() / 2 + (i - 1) * 100,
+                    (float) getWidth() / 2 + (i - 1) * 100,
+                    (float) getHeight() / 2 + (i - 1) * 100,
                     400,
                     new float[]{0f, 1f},
                     new Color[]{new Color(255, 200, 100, 50),

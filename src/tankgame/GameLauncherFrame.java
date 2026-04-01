@@ -7,7 +7,7 @@ import tankgame.ui.SettingsPanel;
 import tankgame.config.KeyConfig;
 import tankgame.config.GameConfig;
 import tankgame.background.BackgroundManager;
-
+import tankgame.game.GameWindow;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
@@ -19,13 +19,10 @@ import java.awt.event.KeyEvent;
 public class GameLauncherFrame extends JFrame {
     private CardLayout cardLayout;
     private BackgroundPanel backgroundPanel;
-    private BackgroundManager backgroundManager;
     private GameConfig gameConfig;
 
     // 面板组件
     private MainMenuPanel mainMenuPanel;
-    private ModeSelectionPanel modeSelectionPanel;
-    private SettingsPanel settingsPanel;
 
     public GameLauncherFrame() {
         initConfig();
@@ -54,7 +51,7 @@ public class GameLauncherFrame extends JFrame {
         setResizable(false);
 
         // 初始化背景管理器
-        backgroundManager = new BackgroundManager();
+        BackgroundManager backgroundManager = new BackgroundManager();
 
         // 创建背景面板
         backgroundPanel = new BackgroundPanel(backgroundManager);
@@ -64,8 +61,8 @@ public class GameLauncherFrame extends JFrame {
 
         // 创建各个面板
         mainMenuPanel = new MainMenuPanel(this);
-        modeSelectionPanel = new ModeSelectionPanel(this);
-        settingsPanel = new SettingsPanel(this, gameConfig);
+        ModeSelectionPanel modeSelectionPanel = new ModeSelectionPanel(this);
+        SettingsPanel settingsPanel = new SettingsPanel(this, gameConfig);
 
         // 添加面板
         backgroundPanel.add(mainMenuPanel, "main");
@@ -128,12 +125,22 @@ public class GameLauncherFrame extends JFrame {
                 "开始游戏", JOptionPane.YES_NO_OPTION);
 
         if (result == JOptionPane.YES_OPTION) {
-            JOptionPane.showMessageDialog(this,
-                    "游戏开发中...\n\n" + modeName + "模式即将到来！\n\n" +
-                            "当前按键配置:\n" + gameConfig,
-                    "提示", JOptionPane.INFORMATION_MESSAGE);
-            // 重新获取焦点
-            requestFocusInWindow();
+            // 关闭启动器
+            setVisible(false);
+
+            // 启动游戏窗口
+            SwingUtilities.invokeLater(() -> {
+                GameWindow gameWindow = new GameWindow();
+                gameWindow.startGame();
+
+                // 可选：监听游戏窗口关闭事件，重新显示启动器
+                gameWindow.addWindowListener(new java.awt.event.WindowAdapter() {
+                    @Override
+                    public void windowClosed(java.awt.event.WindowEvent e) {
+                        setVisible(true);
+                    }
+                });
+            });
         }
     }
 
@@ -146,7 +153,4 @@ public class GameLauncherFrame extends JFrame {
         timer.start();
     }
 
-    public GameConfig getGameConfig() {
-        return gameConfig;
-    }
 }

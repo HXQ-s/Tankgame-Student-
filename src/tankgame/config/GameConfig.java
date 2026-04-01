@@ -6,14 +6,12 @@ package tankgame.config;
 public class GameConfig {
     private KeyConfig player1Keys;
     private KeyConfig player2Keys;
-    private int volume;
-    private String resolution;
-    private boolean fullScreen;
+    private final int volume;
+    private final String resolution;
 
     public GameConfig() {
         this.volume = 70;
         this.resolution = "1280 × 720";
-        this.fullScreen = false;
     }
 
     public KeyConfig getPlayer1Keys() {
@@ -30,30 +28,6 @@ public class GameConfig {
 
     public void setPlayer2Keys(KeyConfig player2Keys) {
         this.player2Keys = player2Keys;
-    }
-
-    public int getVolume() {
-        return volume;
-    }
-
-    public void setVolume(int volume) {
-        this.volume = volume;
-    }
-
-    public String getResolution() {
-        return resolution;
-    }
-
-    public void setResolution(String resolution) {
-        this.resolution = resolution;
-    }
-
-    public boolean isFullScreen() {
-        return fullScreen;
-    }
-
-    public void setFullScreen(boolean fullScreen) {
-        this.fullScreen = fullScreen;
     }
 
     @Override

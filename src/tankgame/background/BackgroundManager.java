@@ -8,15 +8,10 @@ import java.io.File;
  */
 public class BackgroundManager {
     private ImageIcon backgroundImage;
-    private String backgroundFolderPath;
+    private final String backgroundFolderPath;
 
     public BackgroundManager() {
         this.backgroundFolderPath = "E:\\JAVA\\Program1\\src\\resources\\background";
-        loadBackground();
-    }
-
-    public BackgroundManager(String backgroundFolderPath) {
-        this.backgroundFolderPath = backgroundFolderPath;
         loadBackground();
     }
 

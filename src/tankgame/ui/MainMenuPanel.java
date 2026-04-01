@@ -9,7 +9,7 @@ import java.awt.*;
  * 主菜单面板
  */
 public class MainMenuPanel extends JPanel {
-    private GameLauncherFrame parent;
+    private final GameLauncherFrame parent;
     private static final Color TITLE_COLOR = new Color(255, 140, 0);
     private static final Color SHADOW_COLOR = new Color(0, 0, 0, 30);
 

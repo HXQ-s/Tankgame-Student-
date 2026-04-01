@@ -9,7 +9,7 @@ import java.awt.*;
  * 游戏模式选择面板
  */
 public class ModeSelectionPanel extends JPanel {
-    private GameLauncherFrame parent;
+    private final GameLauncherFrame parent;
     private static final Color TITLE_COLOR = new Color(255, 140, 0);
     private static final Color SHADOW_COLOR = new Color(0, 0, 0, 30);
 
@@ -41,7 +41,7 @@ public class ModeSelectionPanel extends JPanel {
         ModernButton levelModeButton = new ModernButton("关卡模式",
                 new Color(255, 140, 0), 22);
         levelModeButton.setPreferredSize(new Dimension(320, 85));
-        levelModeButton.addActionListener(e -> parent.startGame("levelmode"));
+        levelModeButton.addActionListener(e -> parent.startGame("level mode"));
         add(levelModeButton, gbc);
     }
 

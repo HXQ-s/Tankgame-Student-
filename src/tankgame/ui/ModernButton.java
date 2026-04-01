@@ -9,9 +9,9 @@ import java.awt.event.MouseEvent;
  * 现代化按钮组件
  */
 public class ModernButton extends JButton {
-    private Color baseColor;
+    private final Color baseColor;
     private boolean isHover = false;
-    private int fontSize;
+    private final int fontSize;
 
     public ModernButton(String text, Color baseColor, int fontSize) {
         super(text);

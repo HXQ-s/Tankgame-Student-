@@ -10,8 +10,8 @@ import java.awt.*;
  * 游戏设置面板
  */
 public class SettingsPanel extends JPanel {
-    private GameLauncherFrame parent;
-    private GameConfig gameConfig;
+    private final GameLauncherFrame parent;
+    private final GameConfig gameConfig;
     private JSlider volumeSlider;
     private JLabel volumeValue;
     private JComboBox<String> resolutionCombo;
@@ -154,7 +154,11 @@ public class SettingsPanel extends JPanel {
     private void applySettings() {
         String resolution = (String) resolutionCombo.getSelectedItem();
         if (!"全屏模式".equals(resolution)) {
-            String[] size = resolution.split(" × ");
+            String[] size = null;
+            if (resolution != null) {
+                size = resolution.split(" × ");
+            }
+            assert size != null;
             int width = Integer.parseInt(size[0]);
             int height = Integer.parseInt(size[1]);
             parent.setSize(width, height);

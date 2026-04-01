@@ -11,9 +11,9 @@ import java.awt.event.KeyEvent;
  * 按键配置面板
  */
 public class KeyConfigPanel extends JPanel {
-    private String playerName;
-    private KeyConfig keyConfig;
-    private Color accentColor;
+    private final String playerName;
+    private final KeyConfig keyConfig;
+    private final Color accentColor;
 
     public KeyConfigPanel(String playerName, KeyConfig keyConfig, Color accentColor) {
         this.playerName = playerName;
