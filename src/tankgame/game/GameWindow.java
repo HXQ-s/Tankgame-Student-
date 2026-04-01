@@ -6,7 +6,7 @@ import javax.swing.*;
  * 游戏主窗口
  */
 public class GameWindow extends JFrame {
-    private GamePanel gamePanel;
+    private final GamePanel gamePanel;
 
     public GameWindow() {
         setTitle("坦克大战 - 多人对战");

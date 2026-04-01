@@ -12,8 +12,9 @@ import java.util.List;
  * 游戏主面板 - 管理游戏循环和碰撞检测
  */
 public class GamePanel extends JPanel implements Runnable {
+
     private Thread gameThread;
-    private boolean running = true;
+    private boolean running = true;  // ✅ 添加这个属性
 
     // 坦克列表
     private List<Tank> tanks;
@@ -50,17 +51,25 @@ public class GamePanel extends JPanel implements Runnable {
         obstacles = new ArrayList<>();
 
         // 创建玩家坦克
-        player1 = new Tank(100, GAME_HEIGHT - 150, Color.GREEN, 1);
-        player2 = new Tank(GAME_WIDTH - 140, GAME_HEIGHT - 150, Color.BLUE, 2);
+        player1 = new Tank(100, GAME_HEIGHT - 150, 1);
+        player2 = new Tank(GAME_WIDTH - 140, GAME_HEIGHT - 150, 2);
 
-        // 设置按键配置
+        // 玩家1: W/S 前进后退，A/D 左右旋转
         player1.setKeyBindings(
-                KeyEvent.VK_W, KeyEvent.VK_S, KeyEvent.VK_A,
-                KeyEvent.VK_D, KeyEvent.VK_SPACE
+                KeyEvent.VK_W,      // 前进
+                KeyEvent.VK_S,      // 后退
+                KeyEvent.VK_A,      // 左转
+                KeyEvent.VK_D,      // 右转
+                KeyEvent.VK_SPACE   // 射击
         );
+
+// 玩家2: 方向键前进后退，左右箭头旋转
         player2.setKeyBindings(
-                KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT,
-                KeyEvent.VK_RIGHT, KeyEvent.VK_ENTER
+                KeyEvent.VK_UP,     // 前进
+                KeyEvent.VK_DOWN,   // 后退
+                KeyEvent.VK_LEFT,   // 左转
+                KeyEvent.VK_RIGHT,  // 右转
+                KeyEvent.VK_ENTER   // 射击
         );
 
         tanks.add(player1);
@@ -102,6 +111,11 @@ public class GamePanel extends JPanel implements Runnable {
                 if (e.getKeyCode() == KeyEvent.VK_R && gameOver) {
                     restartGame();
                 }
+
+                // 按ESC键退出游戏
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    stopGame();
+                }
             }
 
             @Override
@@ -121,6 +135,16 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     /**
+     * 停止游戏
+     */
+    public void stopGame() {
+        running = false;
+        if (gameThread != null) {
+            gameThread.interrupt();
+        }
+    }
+
+    /**
      * 游戏主循环
      */
     @Override
@@ -129,6 +153,7 @@ public class GamePanel extends JPanel implements Runnable {
         double timePerFrame = 1000000000.0 / FPS;
         long lastTime = System.nanoTime();
 
+        // ✅ 修复：使用 running 变量控制循环
         while (running) {
             long now = System.nanoTime();
             double delta = (now - lastTime) / timePerFrame;
@@ -200,7 +225,6 @@ public class GamePanel extends JPanel implements Runnable {
                     for (Rectangle obstacle : obstacles) {
                         if (bullet.getBounds().intersects(obstacle)) {
                             bulletIterator.remove();
-                            hit = true;
                             break;
                         }
                     }
@@ -290,6 +314,8 @@ public class GamePanel extends JPanel implements Runnable {
         gameOver = false;
         winner = 0;
         initGame();
+        // 重新请求焦点
+        requestFocusInWindow();
     }
 
     /**
@@ -363,42 +389,42 @@ public class GamePanel extends JPanel implements Runnable {
      */
     private void drawUI(Graphics2D g2d) {
         // 绘制生命值条
-        g2d.setFont(new Font("Arial", Font.BOLD, 16));
+        g2d.setFont(new Font("华文行楷", Font.BOLD, 16));
 
         // 玩家1
         g2d.setColor(Color.GREEN);
         g2d.drawString("玩家1", 20, 30);
-        drawHealthBar(g2d, 20, 40, 200, 20, player1.getHealth());
+        drawHealthBar(g2d, 20, player1.getHealth());
 
         // 玩家2
         g2d.setColor(Color.BLUE);
         g2d.drawString("玩家2", GAME_WIDTH - 220, 30);
-        drawHealthBar(g2d, GAME_WIDTH - 220, 40, 200, 20, player2.getHealth());
+        drawHealthBar(g2d, GAME_WIDTH - 220, player2.getHealth());
 
         // 提示信息
         g2d.setColor(Color.WHITE);
-        g2d.setFont(new Font("Arial", Font.PLAIN, 12));
-        g2d.drawString("WASD: 移动 | SPACE: 射击", 20, GAME_HEIGHT - 20);
-        g2d.drawString("方向键: 移动 | ENTER: 射击", GAME_WIDTH - 300, GAME_HEIGHT - 20);
-        g2d.drawString("按 R 键重新开始", GAME_WIDTH/2 - 80, GAME_HEIGHT - 20);
+        g2d.setFont(new Font("华文行楷", Font.PLAIN, 12));
+        g2d.drawString("W/S: 前进/后退 | A/D: 旋转 | SPACE: 射击", 20, GAME_HEIGHT - 20);
+        g2d.drawString("↑/↓: 前进/后退 | ←/→: 旋转 | ENTER: 射击", GAME_WIDTH - 350, GAME_HEIGHT - 20);
+        g2d.drawString("按 R 键重新开始 | ESC 键退出", GAME_WIDTH/2 - 120, GAME_HEIGHT - 20);
     }
 
     /**
      * 绘制生命值条
      */
-    private void drawHealthBar(Graphics2D g2d, int x, int y, int width, int height, int health) {
+    private void drawHealthBar(Graphics2D g2d, int x, int health) {
         // 背景
         g2d.setColor(Color.RED);
-        g2d.fillRect(x, y, width, height);
+        g2d.fillRect(x, 40, 200, 20);
 
         // 当前生命值
         g2d.setColor(Color.GREEN);
-        int currentWidth = width * health / 100;
-        g2d.fillRect(x, y, currentWidth, height);
+        int currentWidth = 200 * health / 100;
+        g2d.fillRect(x, 40, currentWidth, 20);
 
         // 边框
         g2d.setColor(Color.WHITE);
-        g2d.drawRect(x, y, width, height);
+        g2d.drawRect(x, 40, 200, 20);
     }
 
     /**
@@ -410,7 +436,7 @@ public class GamePanel extends JPanel implements Runnable {
         g2d.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
         // 游戏结束文字
-        g2d.setFont(new Font("Arial", Font.BOLD, 72));
+        g2d.setFont(new Font("华文行楷", Font.BOLD, 72));
         g2d.setColor(Color.WHITE);
         String gameOverText = "GAME OVER";
         FontMetrics fm = g2d.getFontMetrics();
@@ -419,14 +445,14 @@ public class GamePanel extends JPanel implements Runnable {
 
         // 胜利者信息
         if (winner > 0) {
-            g2d.setFont(new Font("Arial", Font.BOLD, 48));
+            g2d.setFont(new Font("华文行楷", Font.BOLD, 48));
             String winnerText = "玩家 " + winner + " 胜利！";
             fm = g2d.getFontMetrics();
             textX = (GAME_WIDTH - fm.stringWidth(winnerText)) / 2;
             g2d.setColor(winner == 1 ? Color.GREEN : Color.BLUE);
             g2d.drawString(winnerText, textX, GAME_HEIGHT/2);
         } else {
-            g2d.setFont(new Font("Arial", Font.BOLD, 48));
+            g2d.setFont(new Font("华文行楷", Font.BOLD, 48));
             String drawText = "平局！";
             fm = g2d.getFontMetrics();
             textX = (GAME_WIDTH - fm.stringWidth(drawText)) / 2;
@@ -435,7 +461,7 @@ public class GamePanel extends JPanel implements Runnable {
         }
 
         // 重新开始提示
-        g2d.setFont(new Font("Arial", Font.PLAIN, 24));
+        g2d.setFont(new Font("华文行楷", Font.PLAIN, 24));
         String restartText = "按 R 键重新开始";
         fm = g2d.getFontMetrics();
         textX = (GAME_WIDTH - fm.stringWidth(restartText)) / 2;
