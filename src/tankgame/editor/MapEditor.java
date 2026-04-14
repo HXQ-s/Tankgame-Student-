@@ -5,21 +5,24 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+// 添加这行
 
 /**
  * 地图编辑器主界面
  */
 public class MapEditor extends JFrame {
     // 地图尺寸
-    private static final int MAP_WIDTH = 20;    // 20x20网格
-    private static final int MAP_HEIGHT = 20;
-    private static final int CELL_SIZE = 48;    // 每个格子48x48像素
+    private static final int MAP_WIDTH = 40;    // 20x20网格
+    private static final int MAP_HEIGHT = 40;
+    private static final int CELL_SIZE = 24;    // 每个格子48x48像素
 
     // 障碍物类型
     public static final int EMPTY = 0;
     public static final int WALL = 1;
     public static final int IRON_WALL = 2;
     public static final int TREE = 3;
+    public static final int SPAWN_P1 = 4;  // 玩家1出生点
+    public static final int SPAWN_P2 = 5;  // 玩家2出生点
 
     // 材质图片
     private Image wallImage;
@@ -96,7 +99,7 @@ public class MapEditor extends JFrame {
 
         // 工具选择
         toolBar.add(new JLabel("绘制工具: "));
-        String[] tools = {"清除", "砖墙", "钢墙", "树林"};
+        String[] tools = {"清除", "砖墙", "钢墙", "树林", "玩家1出生点", "玩家2出生点"};
         toolComboBox = new JComboBox<>(tools);
         toolComboBox.setPreferredSize(new Dimension(100, 30));
         toolBar.add(toolComboBox);
@@ -306,9 +309,18 @@ public class MapEditor extends JFrame {
                     int x = e.getX() / CELL_SIZE;
                     int y = e.getY() / CELL_SIZE;
                     if (x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT) {
-                        drawCell(x, y);
-                        selectedX = x;
-                        selectedY = y;
+                        // 鼠标左键：放置障碍物
+                        if (SwingUtilities.isLeftMouseButton(e)) {
+                            drawCell(x, y);
+                            selectedX = x;
+                            selectedY = y;
+                        }
+                        // 鼠标右键：删除障碍物
+                        else if (SwingUtilities.isRightMouseButton(e)) {
+                            deleteCell(x, y);
+                            selectedX = x;
+                            selectedY = y;
+                        }
                     }
                 }
 
@@ -337,10 +349,34 @@ public class MapEditor extends JFrame {
 
         private void drawCell(int x, int y) {
             int tool = toolComboBox.getSelectedIndex();
+            // 检查玩家1出生点数量限制
+            if (tool == SPAWN_P1 && countSpawnPoints(SPAWN_P1) >= 1) {
+                statusLabel.setText("玩家1出生点只能有一个！");
+                return;
+            }
+            // 检查玩家2出生点数量限制
+            if (tool == SPAWN_P2 && countSpawnPoints(SPAWN_P2) >= 1) {
+                statusLabel.setText("玩家2出生点只能有一个！");
+                return;
+            }
             mapData[y][x] = tool;
             repaint();
             statusLabel.setText(String.format("在 (%d, %d) 放置: %s",
                     x, y, toolComboBox.getSelectedItem()));
+        }
+
+        /**
+         * 删除障碍物（鼠标右键）
+         */
+        private void deleteCell(int x, int y) {
+            // 只删除障碍物，不删除出生点
+            if (mapData[y][x] != SPAWN_P1 && mapData[y][x] != SPAWN_P2) {
+                mapData[y][x] = EMPTY;
+                repaint();
+                statusLabel.setText(String.format("在 (%d, %d) 已删除", x, y));
+            } else {
+                statusLabel.setText("出生点不能删除，请使用清除工具");
+            }
         }
 
         @Override
@@ -376,12 +412,30 @@ public class MapEditor extends JFrame {
                         g2d.setColor(new Color(50, 50, 50, 50));
                         g2d.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
                     }
+                    else if (type == SPAWN_P1) {
+                        // 绘制玩家1出生点（绿色圆）
+                        g2d.setColor(new Color(0, 255, 0, 100));
+                        g2d.fillOval(x * CELL_SIZE + 4, y * CELL_SIZE + 4, CELL_SIZE - 8, CELL_SIZE - 8);
+                        g2d.setColor(Color.GREEN);
+                        g2d.drawOval(x * CELL_SIZE + 4, y * CELL_SIZE + 4, CELL_SIZE - 8, CELL_SIZE - 8);
+                        g2d.setFont(new Font("Arial", Font.BOLD, 12));
+                        g2d.drawString("P1", x * CELL_SIZE + 8, y * CELL_SIZE + 18);
+                    }
+                    else if (type == SPAWN_P2) {
+                        // 绘制玩家2出生点（蓝色圆）
+                        g2d.setColor(new Color(0, 0, 255, 100));
+                        g2d.fillOval(x * CELL_SIZE + 4, y * CELL_SIZE + 4, CELL_SIZE - 8, CELL_SIZE - 8);
+                        g2d.setColor(Color.BLUE);
+                        g2d.drawOval(x * CELL_SIZE + 4, y * CELL_SIZE + 4, CELL_SIZE - 8, CELL_SIZE - 8);
+                        g2d.setFont(new Font("Arial", Font.BOLD, 12));
+                        g2d.drawString("P2", x * CELL_SIZE + 8, y * CELL_SIZE + 18);
+                    }
                 }
             }
 
             // 绘制坐标提示
             g2d.setColor(Color.WHITE);
-            g2d.setFont(new Font("Arial", Font.PLAIN, 12));
+            g2d.setFont(new Font("行楷", Font.PLAIN, 12));
             for (int i = 0; i < MAP_WIDTH; i++) {
                 g2d.drawString(String.valueOf(i), i * CELL_SIZE + 5, 15);
             }
@@ -389,6 +443,16 @@ public class MapEditor extends JFrame {
                 g2d.drawString(String.valueOf(i), 5, i * CELL_SIZE + 20);
             }
         }
+    }
+    // 统计出生点数量
+    private int countSpawnPoints(int type) {
+        int count = 0;
+        for (int i = 0; i < MAP_HEIGHT; i++) {
+            for (int j = 0; j < MAP_WIDTH; j++) {
+                if (mapData[i][j] == type) count++;
+            }
+        }
+        return count;
     }
 
     public static void main(String[] args) {

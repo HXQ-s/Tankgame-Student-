@@ -111,7 +111,7 @@ public class GamePanel extends JPanel implements Runnable {
      */
     private void initObstaclesFromMap() {
         int[][] mapData = mapManager.getCurrentMap();
-        int cellSize = 48;
+        int cellSize = 24;
 
         for (int y = 0; y < mapData.length; y++) {
             for (int x = 0; x < mapData[y].length; x++) {
@@ -132,44 +132,77 @@ public class GamePanel extends JPanel implements Runnable {
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                player1.keyPressed(e);
-                player2.keyPressed(e);
+                int key = e.getKeyCode();
 
-                // 按R键重新开始
-                if (e.getKeyCode() == KeyEvent.VK_R && gameOver) {
-                    restartGame();
+                // ESC键：游戏进行中退出游戏，游戏结束后返回启动器
+                if (key == KeyEvent.VK_ESCAPE) {
+                    if (gameOver) {
+                        closeGame();  // 游戏结束后关闭窗口
+                    } else {
+                        exitToLauncher();  // 游戏进行中退出到启动器
+                    }
+                    return;
                 }
 
-                // 按ESC键退出游戏
-                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    stopGame();
+                // 游戏进行中，处理玩家输入
+                if (!gameOver) {
+                    player1.keyPressed(e);
+                    player2.keyPressed(e);
+                }
+
+                // 按R键重新开始（游戏结束后）
+                if (key == KeyEvent.VK_R && gameOver) {
+                    restartGame();
                 }
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
-                player1.keyReleased(e);
-                player2.keyReleased(e);
+                if (!gameOver) {
+                    player1.keyReleased(e);
+                    player2.keyReleased(e);
+                }
             }
         });
     }
 
+
+    /**
+     * 退出游戏，返回启动器界面
+     */
+    private void exitToLauncher() {
+        // 弹出确认对话框
+        int result = JOptionPane.showConfirmDialog(this,
+                "确定要退出游戏吗？", "退出确认",
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+        if (result == JOptionPane.YES_OPTION) {
+            closeGame();
+        }
+    }
+
+    /**
+     * 关闭游戏窗口
+     */
+    private void closeGame() {
+        // 停止游戏线程
+        running = false;
+        if (gameThread != null) {
+            gameThread.interrupt();
+        }
+
+        // 关闭当前窗口
+        Window window = SwingUtilities.getWindowAncestor(this);
+        if (window != null) {
+            window.dispose();
+        }
+    }
     /**
      * 开始游戏线程
      */
     private void startGameThread() {
         gameThread = new Thread(this);
         gameThread.start();
-    }
-
-    /**
-     * 停止游戏
-     */
-    public void stopGame() {
-        running = false;
-        if (gameThread != null) {
-            gameThread.interrupt();
-        }
     }
 
     /**
