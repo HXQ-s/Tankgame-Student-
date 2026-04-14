@@ -30,6 +30,7 @@ public class Tank {
     private boolean rightRotatePressed = false;// 右转
     private boolean shootPressed = false;
 
+
     // 子弹列表
     private final List<Bullet> bullets;
 
@@ -222,7 +223,7 @@ public class Tank {
         int newX = x;
         int newY = y;
 
-        int speed = 5;
+        int speed = 4;
         if (forwardPressed) {
             newX += (int)(Math.cos(angle) * speed);
             newY += (int)(Math.sin(angle) * speed);
@@ -282,30 +283,10 @@ public class Tank {
         // 恢复变换
         g2d.setTransform(oldTransform);
 
-        // 绘制生命值条
-        drawHealthBar(g2d);
-
         // 绘制所有子弹
         for (Bullet bullet : bullets) {
             bullet.draw(g);
         }
-    }
-
-    /**
-     * 绘制生命值条
-     */
-    private void drawHealthBar(Graphics2D g2d) {
-        int barWidth = width;
-        int barHeight = 5;
-        int barX = x;
-        int barY = y - 10;
-
-        g2d.setColor(Color.RED);
-        g2d.fillRect(barX, barY, barWidth, barHeight);
-
-        g2d.setColor(Color.GREEN);
-        int currentWidth = barWidth * health / 100;
-        g2d.fillRect(barX, barY, currentWidth, barHeight);
     }
 
     /**

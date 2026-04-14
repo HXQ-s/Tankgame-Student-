@@ -12,6 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import tankgame.game.MapManager;
 
 /**
  * 坦克大战启动器主窗口 - 使用 KeyListener 版本
@@ -20,6 +21,7 @@ public class GameLauncherFrame extends JFrame {
     private CardLayout cardLayout;
     private BackgroundPanel backgroundPanel;
     private GameConfig gameConfig;
+    private SettingsPanel settingsPanel;
 
     // 面板组件
     private MainMenuPanel mainMenuPanel;
@@ -49,6 +51,7 @@ public class GameLauncherFrame extends JFrame {
         setSize(1200, 800);
         setLocationRelativeTo(null);
         setResizable(false);
+        setMinimumSize(new Dimension(800, 600));
 
         // 初始化背景管理器
         BackgroundManager backgroundManager = new BackgroundManager();
@@ -62,7 +65,8 @@ public class GameLauncherFrame extends JFrame {
         // 创建各个面板
         mainMenuPanel = new MainMenuPanel(this);
         ModeSelectionPanel modeSelectionPanel = new ModeSelectionPanel(this);
-        SettingsPanel settingsPanel = new SettingsPanel(this, gameConfig);
+        settingsPanel = new SettingsPanel(this, gameConfig);
+        backgroundPanel.add(settingsPanel, "settings");
 
         // 添加面板
         backgroundPanel.add(mainMenuPanel, "main");
@@ -115,32 +119,14 @@ public class GameLauncherFrame extends JFrame {
 
     public void showSettings() {
         cardLayout.show(backgroundPanel, "settings");
-        requestFocusInWindow();
+        settingsPanel.requestFocusInWindow();
     }
 
     public void startGame(String mode) {
-        String modeName = mode.equals("multiplayer") ? "多人对战" : "关卡模式";
-        int result = JOptionPane.showConfirmDialog(this,
-                "即将启动游戏 - " + modeName + "\n\n确定要开始游戏吗？",
-                "开始游戏", JOptionPane.YES_NO_OPTION);
-
-        if (result == JOptionPane.YES_OPTION) {
-            // 关闭启动器
-            setVisible(false);
-
-            // 启动游戏窗口
-            SwingUtilities.invokeLater(() -> {
-                GameWindow gameWindow = new GameWindow();
-                gameWindow.startGame();
-
-                // 可选：监听游戏窗口关闭事件，重新显示启动器
-                gameWindow.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosed(java.awt.event.WindowEvent e) {
-                        setVisible(true);
-                    }
-                });
-            });
+        if (mode.equals("multiplayer")) {
+            showMapSelectionForMultiplayer();   // 多人对战：选择地图
+        } else if (mode.equals("level mode")) {
+            showMapSelectionForLevelMode();      // 关卡模式：选择关卡
         }
     }
 
@@ -151,6 +137,65 @@ public class GameLauncherFrame extends JFrame {
             }
         });
         timer.start();
+    }
+
+    private void showMapSelectionForMultiplayer() {
+        MapManager mapManager = new MapManager();
+        java.util.List<String> maps = mapManager.getAvailableMaps();
+
+        if (maps.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "没有找到地图文件！\n请先使用地图编辑器创建地图。",
+                    "提示", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String[] mapArray = maps.toArray(new String[0]);
+        String selectedMap = (String) JOptionPane.showInputDialog(this,
+                "请选择地图:", "选择地图",
+                JOptionPane.QUESTION_MESSAGE, null, mapArray, mapArray[0]);
+
+        if (selectedMap != null) {
+            startGameWithMap("multiplayer", selectedMap);
+        }
+    }
+
+    private void showMapSelectionForLevelMode() {
+        MapManager mapManager = new MapManager();
+        java.util.List<String> levels = mapManager.getAvailableLevels();
+
+        if (levels.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "没有找到关卡文件！\n请先使用地图编辑器创建关卡。",
+                    "提示", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String[] levelArray = levels.toArray(new String[0]);
+        String selectedLevel = (String) JOptionPane.showInputDialog(this,
+                "请选择关卡:", "选择关卡",
+                JOptionPane.QUESTION_MESSAGE, null, levelArray, levelArray[0]);
+
+        if (selectedLevel != null) {
+            startGameWithMap("level mode", selectedLevel);
+        }
+    }
+
+    private void startGameWithMap(String mode, String mapName) {
+        setVisible(false);
+
+        SwingUtilities.invokeLater(() -> {
+            boolean isLevelMode = mode.equals("level mode");
+            GameWindow gameWindow = new GameWindow(isLevelMode, mapName);
+            gameWindow.startGame();
+
+            gameWindow.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosed(java.awt.event.WindowEvent e) {
+                    setVisible(true);
+                }
+            });
+        });
     }
 
 }

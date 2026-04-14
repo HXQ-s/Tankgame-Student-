@@ -6,7 +6,7 @@ package tankgame.config;
 public class GameConfig {
     private KeyConfig player1Keys;
     private KeyConfig player2Keys;
-    private final int volume;
+    private  int volume;
     private final String resolution;
 
     public GameConfig() {
@@ -37,5 +37,9 @@ public class GameConfig {
                 "玩家2: " + player2Keys + "\n" +
                 "音量: " + volume + "%\n" +
                 "分辨率: " + resolution;
+    }
+
+    public void setVolume(int volume) {
+        this.volume = volume;
     }
 }
