@@ -8,12 +8,17 @@ import javax.swing.*;
 public class GameWindow extends JFrame {
     private final GamePanel gamePanel;
 
+    // 无参构造函数（兼容旧代码）
     public GameWindow() {
-        setTitle("坦克大战 - 多人对战");
+        this(false, null);
+    }
+
+    public GameWindow(boolean isLevelMode, String mapName) {
+        setTitle(isLevelMode ? "坦克大战 - 关卡模式" : "坦克大战 - 多人对战");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
 
-        gamePanel = new GamePanel();
+        gamePanel = new GamePanel(isLevelMode, mapName);
         add(gamePanel);
 
         pack();
@@ -31,4 +36,6 @@ public class GameWindow extends JFrame {
             window.startGame();
         });
     }
+
+
 }

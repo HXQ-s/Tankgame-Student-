@@ -3,6 +3,7 @@ package tankgame.ui;
 import tankgame.GameLauncherFrame;
 import tankgame.config.GameConfig;
 
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -25,22 +26,42 @@ public class SettingsPanel extends JPanel {
         setOpaque(false);
         setLayout(new GridBagLayout());
         initComponents();
+
+        // 添加ESC键监听
+        setFocusable(true);
+        addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyPressed(java.awt.event.KeyEvent e) {
+                if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ESCAPE) {
+                    parent.showMainMenu();  // 返回主菜单
+                }
+            }
+        });
+
     }
 
     private void initComponents() {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(15, 30, 15, 30);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.fill = GridBagConstraints.BOTH;          // 改为 BOTH，让滚动面板可以扩展
+        gbc.weightx = 1.0;                          // 水平权重
+        gbc.weighty = 1.0;                          // 垂直权重
         gbc.anchor = GridBagConstraints.CENTER;
+
 
         // 创建设置卡片
         JPanel settingsCard = createSettingsCard();
+        // 将卡片放入滚动面板
+        JScrollPane scrollPane = new JScrollPane(settingsCard);
+        scrollPane.setBorder(null);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         gbc.gridy = 1;
         gbc.gridx = 0;
         gbc.gridwidth = 2;
-        gbc.insets = new Insets(20, 100, 20, 100);
-        add(settingsCard, gbc);
+        gbc.insets = new Insets(20, 50, 20, 50);
+        add(scrollPane, gbc);
     }
 
     private JPanel createSettingsCard() {
@@ -67,6 +88,16 @@ public class SettingsPanel extends JPanel {
 
         // 应用按钮
         addApplyButton(card, gbc);
+
+        // 添加地图编辑器按钮
+        gbc.gridy = 8;
+        ModernButton mapEditorButton = new ModernButton("地图编辑器", new Color(100, 150, 200), 16);
+        mapEditorButton.setPreferredSize(new Dimension(250, 50));
+        mapEditorButton.addActionListener(e -> SwingUtilities.invokeLater(() -> {
+            tankgame.editor.MapEditor editor = new tankgame.editor.MapEditor();
+            editor.setVisible(true);
+        }));
+        card.add(mapEditorButton, gbc);
 
         return card;
     }
@@ -152,32 +183,43 @@ public class SettingsPanel extends JPanel {
     }
 
     private void applySettings() {
-        String resolution = (String) resolutionCombo.getSelectedItem();
-        if (!"全屏模式".equals(resolution)) {
-            String[] size = null;
-            if (resolution != null) {
-                size = resolution.split(" × ");
-            }
-            assert size != null;
-            int width = Integer.parseInt(size[0]);
-            int height = Integer.parseInt(size[1]);
-            parent.setSize(width, height);
-            parent.setLocationRelativeTo(null);
+        Object selected = resolutionCombo.getSelectedItem();
+        if (selected == null) return;
+        String resolution = selected.toString();
+
+        if ("全屏模式".equals(resolution)) {
+            parent.setExtendedState(JFrame.MAXIMIZED_BOTH);
         } else {
-            GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment()
-                    .getDefaultScreenDevice();
-            if (gd.isFullScreenSupported()) {
-                gd.setFullScreenWindow(parent);
+            parent.setExtendedState(JFrame.NORMAL);
+            String[] size = resolution.split(" × ");
+            if (size.length == 2) {
+                try {
+                    int width = Integer.parseInt(size[0]);
+                    int height = Integer.parseInt(size[1]);
+                    parent.setSize(width, height);
+                    parent.setLocationRelativeTo(null); // 居中
+                    parent.validate(); // 强制重新布局
+                } catch (NumberFormatException e) {
+                    JOptionPane.showMessageDialog(parent, "分辨率格式错误", "提示", JOptionPane.WARNING_MESSAGE);
+                }
             } else {
-                JOptionPane.showMessageDialog(parent, "当前系统不支持全屏模式",
-                        "提示", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(parent, "分辨率格式错误", "提示", JOptionPane.WARNING_MESSAGE);
             }
         }
+
+        // 可选：保存音量设置到 gameConfig
+        gameConfig.setVolume(volumeSlider.getValue());
 
         JOptionPane.showMessageDialog(parent,
                 "设置已保存！\n音量：" + volumeSlider.getValue() + "%\n分辨率：" + resolution,
                 "提示", JOptionPane.INFORMATION_MESSAGE);
+
+        // 应用设置后重新获取焦点
+        // 可选：重新确认ESC监听（已经存在，无需重复添加）
+        SwingUtilities.invokeLater(this::requestFocusInWindow);
+
     }
+
 
     @Override
     protected void paintComponent(Graphics g) {

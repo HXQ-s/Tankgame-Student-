@@ -12,9 +12,9 @@ import java.io.*;
  */
 public class MapEditor extends JFrame {
     // 地图尺寸
-    private static final int MAP_WIDTH = 40;    // 20x20网格
-    private static final int MAP_HEIGHT = 40;
-    private static final int CELL_SIZE = 24;    // 每个格子48x48像素
+    private static final int MAP_WIDTH = 20;    // 20x20网格
+    private static final int MAP_HEIGHT = 20;
+    private static final int CELL_SIZE = 48;    // 每个格子48x48像素
 
     // 障碍物类型
     public static final int EMPTY = 0;
@@ -181,20 +181,15 @@ public class MapEditor extends JFrame {
     }
 
     private void newMap() {
-        int result = JOptionPane.showConfirmDialog(this,
-                "新建地图会清除当前内容，是否继续？", "新建地图",
-                JOptionPane.YES_NO_OPTION);
-
-        if (result == JOptionPane.YES_OPTION) {
-            for (int i = 0; i < MAP_HEIGHT; i++) {
-                for (int j = 0; j < MAP_WIDTH; j++) {
-                    mapData[i][j] = EMPTY;
-                }
+        // 直接清空，不询问
+        for (int i = 0; i < MAP_HEIGHT; i++) {
+            for (int j = 0; j < MAP_WIDTH; j++) {
+                mapData[i][j] = EMPTY;
             }
-            currentMapPath = null;
-            mapPanel.repaint();
-            statusLabel.setText("已创建新地图");
         }
+        currentMapPath = null;
+        mapPanel.repaint();
+        statusLabel.setText("已创建新地图");
     }
 
     private void clearMap() {

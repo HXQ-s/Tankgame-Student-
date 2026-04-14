@@ -1,19 +1,23 @@
 package tankgame.game;
 
 import java.io.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.awt.Point;
 
 /**
  * 地图管理器 - 负责加载和管理地图
  */
 public class MapManager {
-    // 障碍物类型常量
-    public static final int EMPTY = 0;
     public static final int WALL = 1;
     public static final int IRON_WALL = 2;
     public static final int TREE = 3;
     public static final int SPAWN_P1 = 4;  // 添加
     public static final int SPAWN_P2 = 5;  // 添加
     private int[][] currentMap;
+    // 添加或修改
+    private static final int MAP_WIDTH = 20;
+    private static final int MAP_HEIGHT = 20;
 
     // 存储路径（在src目录下）
     private final String mapsPath = "src/maps";
@@ -97,7 +101,7 @@ public class MapManager {
         String filePath = mapsPath + File.separator + fileName + ".tankmap";
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filePath))) {
             int[][] loadedMap = (int[][]) ois.readObject();
-            if (loadedMap.length == 20 && loadedMap[0].length == 20) {
+            if (loadedMap.length == MAP_HEIGHT && loadedMap[0].length == MAP_WIDTH) {
                 currentMap = loadedMap;
                 System.out.println("地图加载成功: " + fileName);
                 return true;
@@ -131,6 +135,71 @@ public class MapManager {
      */
     public int[][] getCurrentMap() {
         return currentMap;
+    }
+
+    /**
+     * 获取玩家1出生点位置（像素坐标）
+     */
+    public Point getPlayer1Spawn() {
+        return findSpawnPoint(SPAWN_P1);
+    }
+
+    /**
+     * 获取玩家2出生点位置（像素坐标）
+     */
+    public Point getPlayer2Spawn() {
+        return findSpawnPoint(SPAWN_P2);
+    }
+
+    /**
+     * 查找出生点位置，返回像素坐标（单元格大小48px）
+     */
+    private Point findSpawnPoint(int spawnType) {
+        for (int y = 0; y < currentMap.length; y++) {
+            for (int x = 0; x < currentMap[y].length; x++) {
+                if (currentMap[y][x] == spawnType) {
+                    // 单元格大小为48像素
+                    return new Point(x * 48, y * 48);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 获取所有可用地图文件列表
+     */
+    public List<String> getAvailableMaps() {
+        List<String> maps = new ArrayList<>();
+        File mapsDir = new File(mapsPath);
+        if (mapsDir.exists() && mapsDir.isDirectory()) {
+            File[] files = mapsDir.listFiles((dir, name) -> name.endsWith(".tankmap"));
+            if (files != null) {
+                for (File file : files) {
+                    String name = file.getName();
+                    maps.add(name.substring(0, name.lastIndexOf(".tankmap")));
+                }
+            }
+        }
+        return maps;
+    }
+
+    /**
+     * 获取所有可用关卡文件列表
+     */
+    public List<String> getAvailableLevels() {
+        List<String> levels = new ArrayList<>();
+        File levelsDir = new File(levelsPath);
+        if (levelsDir.exists() && levelsDir.isDirectory()) {
+            File[] files = levelsDir.listFiles((dir, name) -> name.endsWith(".level"));
+            if (files != null) {
+                for (File file : files) {
+                    String name = file.getName();
+                    levels.add(name.substring(0, name.lastIndexOf(".level")));
+                }
+            }
+        }
+        return levels;
     }
 
 }
