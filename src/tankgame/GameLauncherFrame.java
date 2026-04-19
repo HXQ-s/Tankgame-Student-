@@ -14,7 +14,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import tankgame.game.MapManager;
 
 /**
  * 坦克大战启动器主窗口 - 使用 KeyListener 版本
