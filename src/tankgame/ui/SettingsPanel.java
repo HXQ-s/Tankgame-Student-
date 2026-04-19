@@ -2,7 +2,7 @@ package tankgame.ui;
 
 import tankgame.GameLauncherFrame;
 import tankgame.config.GameConfig;
-
+import tankgame.sound.SoundManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -208,6 +208,8 @@ public class SettingsPanel extends JPanel {
         }
 
         // 可选：保存音量设置到 gameConfig
+        int vol = volumeSlider.getValue();                     // 0-100
+        SoundManager.getInstance().setVolume(vol / 100.0f);   // 转为 0.0-1.0
         gameConfig.setVolume(volumeSlider.getValue());
 
         JOptionPane.showMessageDialog(parent,

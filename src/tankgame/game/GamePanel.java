@@ -7,7 +7,8 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
+import java.util.Objects;
+import tankgame.sound.SoundManager;
 /**
  * 游戏主面板 - 管理游戏循环和碰撞检测
  */
@@ -56,17 +57,18 @@ public class GamePanel extends JPanel implements Runnable {
         initGame();
         setupKeyListener();
         startGameThread();
+
+        initSounds();
+        startBackgroundMusic();
     }
 
     private void loadTextures() {
-        String texturePath = "src/resources/texture";
         try {
-            wallImage = new ImageIcon(texturePath + "/wall.png").getImage();
-            ironWallImage = new ImageIcon(texturePath + "/iron_wall.png").getImage();
-            treeImage = new ImageIcon(texturePath + "/tree.png").getImage();
+            wallImage = new ImageIcon(Objects.requireNonNull(getClass().getResource("/texture/wall.png"))).getImage();
+            ironWallImage = new ImageIcon(Objects.requireNonNull(getClass().getResource("/texture/iron_wall.png"))).getImage();
+            treeImage = new ImageIcon(Objects.requireNonNull(getClass().getResource("/texture/tree.png"))).getImage();
         } catch (Exception e) {
             System.err.println("加载障碍物材质失败: " + e.getMessage());
-            // 降级使用图形绘制（备选）
         }
     }
 
@@ -307,6 +309,7 @@ public class GamePanel extends JPanel implements Runnable {
                         // 添加爆炸特效
                         Rectangle bounds = otherTank.getBounds();
                         effects.add(new Effect(bounds.x + bounds.width/2, bounds.y + bounds.height/2));
+                        SoundManager.getInstance().playSound("explosion");
                         break;
                     }
                 }
@@ -323,9 +326,11 @@ public class GamePanel extends JPanel implements Runnable {
                             }
                             if (obstacle.getType() == MapManager.WALL) {
                                 effects.add(new Effect(obstacle.x + obstacle.width / 2, obstacle.y + obstacle.height / 2));
+                                SoundManager.getInstance().playSound("explosion");
                                 obsIter.remove(); // 击碎砖墙
                             }
                             // 钢墙和不可击碎的障碍物：子弹消失但障碍物保留
+                            SoundManager.getInstance().playSound("hit");
                             bulletIterator.remove();
                             break;
                         }
@@ -365,6 +370,8 @@ public class GamePanel extends JPanel implements Runnable {
                 }
             }
         }
+
+
     }
 
     /**
@@ -602,6 +609,20 @@ public class GamePanel extends JPanel implements Runnable {
         public int getType() {
             return type;
         }
+    }
+
+    private void initSounds() {
+        SoundManager sm = SoundManager.getInstance();
+        sm.loadSound("shoot", "/sounds/shoot.wav");
+        sm.loadSound("explosion", "/sounds/explosion.wav");
+        sm.loadSound("hit", "/sounds/hit.wav");      // 可选
+        // sm.loadSound("move", "/sounds/move.wav"); // 可选
+    }
+
+    private void startBackgroundMusic() {
+        SoundManager sm = SoundManager.getInstance();
+        sm.loadBGM("/sounds/bgm.wav");
+        sm.playBGM();
     }
 }
 

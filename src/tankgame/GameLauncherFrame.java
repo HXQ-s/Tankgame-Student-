@@ -1,18 +1,19 @@
 package tankgame;
 
+import tankgame.background.BackgroundManager;
+import tankgame.config.GameConfig;
+import tankgame.config.KeyConfig;
+import tankgame.game.GameWindow;
+import tankgame.game.MapManager;
 import tankgame.ui.BackgroundPanel;
 import tankgame.ui.MainMenuPanel;
 import tankgame.ui.ModeSelectionPanel;
 import tankgame.ui.SettingsPanel;
-import tankgame.config.KeyConfig;
-import tankgame.config.GameConfig;
-import tankgame.background.BackgroundManager;
-import tankgame.game.GameWindow;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import tankgame.game.MapManager;
 
 /**
  * 坦克大战启动器主窗口 - 使用 KeyListener 版本

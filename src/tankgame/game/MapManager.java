@@ -20,8 +20,8 @@ public class MapManager {
     private static final int MAP_HEIGHT = 20;
 
     // 存储路径（在src目录下）
-    private final String mapsPath = "src/maps";
-    private final String levelsPath = "src/levels";
+    private final String mapsPath = System.getProperty("user.dir") + File.separator + "maps";
+    private final String levelsPath = System.getProperty("user.dir") + File.separator + "levels";
 
     public MapManager() {
         currentMap = new int[20][20];

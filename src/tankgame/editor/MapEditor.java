@@ -39,8 +39,8 @@ public class MapEditor extends JFrame {
     private String currentMapPath = null;
 
     // 存储路径（在src目录下）
-    private final String mapsPath = "src/maps";
-    private final String levelsPath = "src/levels";
+    private final String mapsPath = System.getProperty("user.dir") + File.separator + "maps";
+    private final String levelsPath = System.getProperty("user.dir") + File.separator + "levels";
 
     public MapEditor() {
         setTitle("坦克大战 - 地图编辑器");

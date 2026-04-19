@@ -1,7 +1,8 @@
 package tankgame.ui;
 
 import tankgame.GameLauncherFrame;
-
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import javax.swing.*;
 import java.awt.*;
 
@@ -18,6 +19,17 @@ public class ModeSelectionPanel extends JPanel {
         setOpaque(false);
         setLayout(new GridBagLayout());
         initComponents();
+
+        // 添加 ESC 键监听
+        setFocusable(true);
+        addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    parent.showMainMenu();  // 返回主菜单
+                }
+            }
+        });
     }
 
     private void initComponents() {

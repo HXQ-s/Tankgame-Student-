@@ -4,12 +4,11 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.imageio.ImageIO;
-
+import tankgame.sound.SoundManager;
 /**
  * 坦克类 - 支持360度旋转
  */
@@ -63,19 +62,19 @@ public class Tank {
         int targetWidth = 48;   // 目标宽度
         int targetHeight = 48;  // 目标高度
         try {
-            String imagePath = "E:\\JAVA\\Program1\\src\\resources\\Tank";
-            File imageFile = new File(imagePath + File.separator + tankName + ".png");
-            if (imageFile.exists()) {
-                BufferedImage original = ImageIO.read(imageFile);
+            String resourcePath = "/tank/" + tankName + ".png";
+            java.net.URL imgURL = getClass().getResource(resourcePath);
+            if (imgURL != null) {
+                BufferedImage original = ImageIO.read(imgURL);
                 if (original != null) {
                     // 缩放图片
                     tankImage = scaleImage(original, targetWidth, targetHeight);
                     width = targetWidth;
                     height = targetHeight;
-                    System.out.println("坦克图片加载成功并缩放: " + tankName);
+                    System.out.println("坦克图片加载成功并缩放: " + resourcePath);
                 }
             } else {
-                System.err.println("错误：找不到坦克图片！使用默认图形");
+                System.err.println(("未找到坦克图片: " + resourcePath));
                 createDefaultImage(targetWidth, targetHeight);
             }
         } catch (IOException e) {
@@ -253,7 +252,7 @@ public class Tank {
         int bulletX = x + width / 2 - Bullet.getWIDTH() / 2;
         int bulletY = y + height / 2 - Bullet.getHEIGHT() / 2;
 
-
+        SoundManager.getInstance().playSound("shoot");
 
         // 传入角度而不是方向枚举
         Bullet bullet = new Bullet(bulletX, bulletY,angle);

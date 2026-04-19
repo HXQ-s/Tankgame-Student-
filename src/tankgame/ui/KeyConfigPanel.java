@@ -88,19 +88,7 @@ public class KeyConfigPanel extends JPanel {
         keyDialog.setLayout(new BorderLayout());
 
         // 创建内容面板
-        JPanel contentPanel = new JPanel(new BorderLayout());
-        contentPanel.setBackground(Color.WHITE);
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        JLabel label = new JLabel("请按下新的按键...", SwingConstants.CENTER);
-        label.setFont(new Font("STXingkai", Font.PLAIN, 16));
-        label.setForeground(new Color(60, 60, 80));
-        contentPanel.add(label, BorderLayout.CENTER);
-
-        JLabel tipLabel = new JLabel("提示：按 ESC 取消设置", SwingConstants.CENTER);
-        tipLabel.setFont(new Font("STXingkai", Font.PLAIN, 12));
-        tipLabel.setForeground(new Color(150, 150, 160));
-        contentPanel.add(tipLabel, BorderLayout.SOUTH);
+        JPanel contentPanel = getJPanel();
 
         keyDialog.add(contentPanel);
 
@@ -135,6 +123,23 @@ public class KeyConfigPanel extends JPanel {
         });
 
         keyDialog.setVisible(true);
+    }
+
+    private static JPanel getJPanel() {
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.setBackground(Color.WHITE);
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JLabel label = new JLabel("请按下新的按键...", SwingConstants.CENTER);
+        label.setFont(new Font("STXingkai", Font.PLAIN, 16));
+        label.setForeground(new Color(60, 60, 80));
+        contentPanel.add(label, BorderLayout.CENTER);
+
+        JLabel tipLabel = new JLabel("提示：按 ESC 取消设置", SwingConstants.CENTER);
+        tipLabel.setFont(new Font("STXingkai", Font.PLAIN, 12));
+        tipLabel.setForeground(new Color(150, 150, 160));
+        contentPanel.add(tipLabel, BorderLayout.SOUTH);
+        return contentPanel;
     }
 
     private void updateKeyConfig(String action, int keyCode) {
