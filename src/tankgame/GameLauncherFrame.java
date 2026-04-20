@@ -183,8 +183,14 @@ public class GameLauncherFrame extends JFrame {
         setVisible(false);
 
         SwingUtilities.invokeLater(() -> {
-            boolean isLevelMode = mode.equals("level mode");
+            boolean isLevelMode = mode.equals("levelmode");
             GameWindow gameWindow = new GameWindow(isLevelMode, mapName);
+
+            // 如果启动器当前处于全屏（最大化）状态，则游戏窗口也设为全屏
+            if ((getExtendedState() & JFrame.MAXIMIZED_BOTH) != 0) {
+                gameWindow.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            }
+
             gameWindow.startGame();
 
             gameWindow.addWindowListener(new java.awt.event.WindowAdapter() {
