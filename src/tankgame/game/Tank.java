@@ -59,10 +59,10 @@ public class Tank {
      */
     private void loadTankImage() {
         String tankName = (playerId == 1) ? "tank_green" : "tank_blue";
+        String resourcePath = "/texture/" + tankName + ".png";
         int targetWidth = 48;   // 目标宽度
         int targetHeight = 48;  // 目标高度
         try {
-            String resourcePath = "/tank/" + tankName + ".png";
             java.net.URL imgURL = getClass().getResource(resourcePath);
             if (imgURL != null) {
                 BufferedImage original = ImageIO.read(imgURL);
@@ -190,7 +190,7 @@ public class Tank {
         // 处理射击
         if (shootPressed && shootCooldown == 0) {
             shoot();
-            shootCooldown = 30;
+            shootCooldown = 50;
         }
 
         // 更新所有子弹 - 修复 isActive() 方法调用
@@ -218,19 +218,24 @@ public class Tank {
         angle = (angle + 2 * Math.PI) % (2 * Math.PI);
 
 
-        // 计算移动
-        int newX = x;
-        int newY = y;
-
-        int speed = 4;
+        double dx = 0, dy = 0;
         if (forwardPressed) {
-            newX += (int)(Math.cos(angle) * speed);
-            newY += (int)(Math.sin(angle) * speed);
+            dx += Math.cos(angle);
+            dy += Math.sin(angle);
         }
         if (backwardPressed) {
-            newX -= (int)(Math.cos(angle) * speed);
-            newY -= (int)(Math.sin(angle) * speed);
+            dx -= Math.cos(angle);
+            dy -= Math.sin(angle);
         }
+        if (dx != 0 || dy != 0) {
+            double len = Math.hypot(dx, dy);
+            dx /= len;
+            dy /= len;
+        }
+
+        int speed = 5;
+        int newX = x + (int)(dx * speed);
+        int newY = y + (int)(dy * speed);
 
         // 边界检查
         int gameWidth = 1200;

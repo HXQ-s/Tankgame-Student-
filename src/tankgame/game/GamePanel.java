@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import tankgame.sound.SoundManager;
+import tankgame.util.CodeQualityChecker;
 /**
  * 游戏主面板 - 管理游戏循环和碰撞检测
  */
@@ -19,7 +20,8 @@ public class GamePanel extends JPanel implements Runnable {
     private Image wallImage;
     private Image ironWallImage;
     private Image treeImage;
-
+    private final CodeQualityChecker qualityChecker;
+    private long lastReportTime = 0;
     //爆炸效果
     private final List<Effect> effects = new ArrayList<>();
 
@@ -50,11 +52,12 @@ public class GamePanel extends JPanel implements Runnable {
         setPreferredSize(new Dimension(GAME_WIDTH, GAME_HEIGHT));
         setBackground(Color.DARK_GRAY);
         setFocusable(true);
+        qualityChecker = CodeQualityChecker.getInstance();
+        qualityChecker.setEnabled(true); // 开发时开启，发布时可关闭
 
         mapManager = new MapManager();  // 初始化地图管理器
         loadTextures();
-
-        initGame();
+       initGame();
         setupKeyListener();
         startGameThread();
 
@@ -254,6 +257,7 @@ public class GamePanel extends JPanel implements Runnable {
     private void update() {
         if (gameOver) return;
 
+
         // 更新坦克
         for (Tank tank : tanks) {
             tank.update();
@@ -261,8 +265,16 @@ public class GamePanel extends JPanel implements Runnable {
         // 碰撞检测
         checkCollisions();
 
+        qualityChecker.updateFrameRate();
+        qualityChecker.checkMemoryUsage();
+
         // 检查游戏结束条件
         checkGameOver();
+
+        long now = System.currentTimeMillis();
+        if (now - lastReportTime > 5000) {
+            lastReportTime = now;
+        }
 
         // 更新特效
         effects.removeIf(e -> !e.isActive());
@@ -375,7 +387,7 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     /**
-     * 坦克与障碍物的碰撞处理（改进版）
+     * 坦克与障碍物的碰撞处理
      */
     private void resolveTankCollision(Tank tank, Obstacle obstacle) {
         Rectangle tankRect = tank.getBounds();
@@ -474,6 +486,12 @@ public class GamePanel extends JPanel implements Runnable {
         if (gameOver) {
             drawGameOver(g2d);
         }
+
+        // 可按需开关，或设置快捷键
+        // 按某个快捷键开启
+        qualityChecker.drawDebugInfo(g2d, 10, 50);
+
+        qualityChecker.drawDebugInfo((Graphics2D) g, 10, 50);
     }
 
     private void drawObstacleByType(Graphics2D g2d, Obstacle obs) {

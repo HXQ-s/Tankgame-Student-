@@ -37,8 +37,8 @@ public class MapManager {
      * 创建默认地图
      */
     public void createDefaultMap() {
-        // 创建40x40的地图
-        int[][] defaultMap = new int[20][20];  // 注意：地图尺寸是40x40
+        // 创建20x20的地图
+        int[][] defaultMap = new int[20][20];  // 注意：地图尺寸是20x20
 
         // 填充边界为砖墙
         for (int i = 0; i < 20; i++) {

@@ -80,7 +80,6 @@ public class MapEditor extends JFrame {
 
     private void loadTextures() {
         String texturePath = "src/resources/texture";
-
         try {
             wallImage = new ImageIcon(texturePath + File.separator + "wall.png").getImage();
             ironWallImage = new ImageIcon(texturePath + File.separator + "iron_wall.png").getImage();
@@ -88,6 +87,9 @@ public class MapEditor extends JFrame {
         } catch (Exception e) {
             System.err.println("加载材质图片失败: " + e.getMessage());
         }
+
+        java.net.URL url = getClass().getResource("/tank/tank_green.png");
+        System.out.println("坦克图片URL: " + url);
     }
 
     private void initUI() {

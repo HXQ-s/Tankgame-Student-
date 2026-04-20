@@ -9,10 +9,11 @@ import tankgame.ui.BackgroundPanel;
 import tankgame.ui.MainMenuPanel;
 import tankgame.ui.ModeSelectionPanel;
 import tankgame.ui.SettingsPanel;
+import java.awt.KeyboardFocusManager;
+
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 /**
@@ -83,28 +84,24 @@ public class GameLauncherFrame extends JFrame {
     }
 
     private void setupGlobalEscListener() {
-        // 为框架添加键盘监听
-        addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    if (!isMainMenuShowing()) {
-                        showMainMenu();
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
+            if (e.getID() == KeyEvent.KEY_PRESSED && e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                // 获取当前显示的面板
+                Component currentPanel = null;
+                for (Component comp : backgroundPanel.getComponents()) {
+                    if (comp.isVisible()) {
+                        currentPanel = comp;
+                        break;
                     }
                 }
+                // 如果当前不是主菜单，则返回主菜单
+                if (currentPanel != mainMenuPanel) {
+                    SwingUtilities.invokeLater(this::showMainMenu);
+                    return true; // 事件已处理
+                }
             }
+            return false; // 继续传递事件
         });
-    }
-
-    private boolean isMainMenuShowing() {
-        Component current = null;
-        for (Component comp : backgroundPanel.getComponents()) {
-            if (comp.isVisible()) {
-                current = comp;
-                break;
-            }
-        }
-        return current == mainMenuPanel;
     }
 
     public void showMainMenu() {
