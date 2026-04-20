@@ -5,6 +5,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.Objects;
 // 添加这行
 
 /**
@@ -62,6 +63,7 @@ public class MapEditor extends JFrame {
 
         // 新建空白地图
         newMap();
+
     }
 
     private void createDirectories() {
@@ -79,17 +81,13 @@ public class MapEditor extends JFrame {
     }
 
     private void loadTextures() {
-        String texturePath = "src/resources/texture";
         try {
-            wallImage = new ImageIcon(texturePath + File.separator + "wall.png").getImage();
-            ironWallImage = new ImageIcon(texturePath + File.separator + "iron_wall.png").getImage();
-            treeImage = new ImageIcon(texturePath + File.separator + "tree.png").getImage();
+            wallImage = new ImageIcon(Objects.requireNonNull(getClass().getResource("/texture/wall.png"))).getImage();
+            ironWallImage = new ImageIcon(Objects.requireNonNull(getClass().getResource("/texture/iron_wall.png"))).getImage();
+            treeImage = new ImageIcon(Objects.requireNonNull(getClass().getResource("/texture/tree.png"))).getImage();
         } catch (Exception e) {
             System.err.println("加载材质图片失败: " + e.getMessage());
         }
-
-        java.net.URL url = getClass().getResource("/tank/tank_green.png");
-        System.out.println("坦克图片URL: " + url);
     }
 
     private void initUI() {
@@ -209,7 +207,7 @@ public class MapEditor extends JFrame {
         for (int i = 0; i < MAP_HEIGHT; i++) {
             for (int j = 0; j < MAP_WIDTH; j++) {
                 if (i == 0 || i == MAP_HEIGHT - 1 || j == 0 || j == MAP_WIDTH - 1) {
-                    mapData[i][j] = WALL;
+                    mapData[i][j] = IRON_WALL;
                 }
             }
         }
@@ -300,31 +298,22 @@ public class MapEditor extends JFrame {
             setPreferredSize(new Dimension(MAP_WIDTH * CELL_SIZE, MAP_HEIGHT * CELL_SIZE));
 
             // 鼠标绘制
-            addMouseListener(new MouseAdapter() {
+            addMouseMotionListener(new MouseMotionAdapter() {
                 @Override
-                public void mousePressed(MouseEvent e) {
+                public void mouseDragged(MouseEvent e) {
                     int x = e.getX() / CELL_SIZE;
                     int y = e.getY() / CELL_SIZE;
                     if (x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT) {
-                        // 鼠标左键：放置障碍物
-                        if (SwingUtilities.isLeftMouseButton(e)) {
-                            drawCell(x, y);
-                            selectedX = x;
-                            selectedY = y;
-                        }
-                        // 鼠标右键：删除障碍物
-                        else if (SwingUtilities.isRightMouseButton(e)) {
-                            deleteCell(x, y);
+                        if (x != selectedX || y != selectedY) {
+                            if (SwingUtilities.isLeftMouseButton(e)) {
+                                drawCell(x, y);
+                            } else if (SwingUtilities.isRightMouseButton(e)) {
+                                deleteCell(x, y);
+                            }
                             selectedX = x;
                             selectedY = y;
                         }
                     }
-                }
-
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    selectedX = -1;
-                    selectedY = -1;
                 }
             });
 
@@ -356,6 +345,13 @@ public class MapEditor extends JFrame {
                 statusLabel.setText("玩家2出生点只能有一个！");
                 return;
             }
+
+            // 新增：出生点不能放在边界上
+            if ((tool == SPAWN_P1 || tool == SPAWN_P2) && (x == 0 || x == MAP_WIDTH-1 || y == 0 || y == MAP_HEIGHT-1)) {
+                statusLabel.setText("出生点不能放在边界上！");
+                return;
+            }
+
             mapData[y][x] = tool;
             repaint();
             statusLabel.setText(String.format("在 (%d, %d) 放置: %s",
@@ -366,14 +362,10 @@ public class MapEditor extends JFrame {
          * 删除障碍物（鼠标右键）
          */
         private void deleteCell(int x, int y) {
-            // 只删除障碍物，不删除出生点
-            if (mapData[y][x] != SPAWN_P1 && mapData[y][x] != SPAWN_P2) {
-                mapData[y][x] = EMPTY;
-                repaint();
-                statusLabel.setText(String.format("在 (%d, %d) 已删除", x, y));
-            } else {
-                statusLabel.setText("出生点不能删除，请使用清除工具");
-            }
+            // 删除任意单元格（障碍物或出生点）
+            mapData[y][x] = EMPTY;
+            repaint();
+            statusLabel.setText(String.format("在 (%d, %d) 已删除", x, y));
         }
 
         @Override
